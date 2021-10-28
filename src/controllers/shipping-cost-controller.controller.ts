@@ -2,8 +2,8 @@
 
 // import {inject} from '@loopback/core';
 import {repository} from '@loopback/repository';
-import {post, getModelSchemaRef, response, requestBody} from '@loopback/rest';
-import { PaymentData } from '../models';
+import {post, get, getModelSchemaRef, response, requestBody, param} from '@loopback/rest';
+import {PaymentData, Zone} from '../models';
 import {
   CouponRepository,
   PostalCodeRepository,
@@ -144,5 +144,28 @@ export class ShippingCostController {
       total: data.cost + shippingCost,
       estimatedTime: zoneFound?.shippingTime
     };
+  }
+  @get('/getZone/{postalCode}')
+  @response(200, {
+    description: 'get zone by postal code',
+    content: {
+      'application/json': {
+        schema: getModelSchemaRef(Zone, {includeRelations: true}),
+      },
+    },
+  })
+  async getZone(
+    @param.path.string('postalCode') postalCode: string
+  ): Promise<Zone | {}> {
+    const stateFound = await this.postalCodeRepository.findOne({
+      where: {code: postalCode},
+    });
+    const zoneFound = await this.zoneRepository.findOne({
+      where: {states: stateFound?.state},
+    });
+    if (zoneFound) {
+      return zoneFound
+    }
+    return {}
   }
 }

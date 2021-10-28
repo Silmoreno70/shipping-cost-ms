@@ -2,22 +2,12 @@ import {Model, model, property} from '@loopback/repository';
 
 @model({settings: {strict: false}})
 export class PaymentData extends Model {
-  @property({
-    type: 'number',
-    required: true,
-  })
-  cost: number;
-
-  @property({
-    type: 'number',
-    required: true,
-  })
-  postalCode: number;
 
   @property({
     type: 'string',
+    required: true,
   })
-  coupon?: string;
+  idZone: string;
 
   @property({
     type: 'number',
@@ -26,10 +16,10 @@ export class PaymentData extends Model {
   weight: number;
 
   @property({
-    type: 'string',
+    type: 'number',
     required: true,
   })
-  paymentMethod: string;
+  discount: number;
 
   // Define well-known properties here
 
