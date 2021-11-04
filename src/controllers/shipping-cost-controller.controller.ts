@@ -79,7 +79,8 @@ export class ShippingCostController {
     if (zoneFound) {
       return {
         name: zoneFound.name,
-        id: zoneFound.id
+        id: zoneFound.id,
+        shippingTime: zoneFound.shippingTime
       }
     }
     return {}
