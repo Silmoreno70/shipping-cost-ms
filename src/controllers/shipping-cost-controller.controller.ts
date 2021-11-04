@@ -55,7 +55,8 @@ export class ShippingCostController {
     }
     shippingCost = (shippingCost * data.discount) / 100
     return {
-      shippingCost
+      shippingCost,
+      shippingTime: zoneFound.shippingTime
     }
   }
   @get('/getZone/{postalCode}')
@@ -79,8 +80,7 @@ export class ShippingCostController {
     if (zoneFound) {
       return {
         name: zoneFound.name,
-        id: zoneFound.id,
-        shippingTime: zoneFound.shippingTime
+        id: zoneFound.id
       }
     }
     return {}
