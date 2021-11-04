@@ -77,7 +77,10 @@ export class ShippingCostController {
       where: {states: stateFound?.state},
     });
     if (zoneFound) {
-      return zoneFound
+      return {
+        name: zoneFound.name,
+        id: zoneFound.id
+      }
     }
     return {}
   }
