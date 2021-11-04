@@ -1,4 +1,20 @@
 import {ApplicationConfig, ShippingCostApplication} from './application';
+import * as Sentry from '@sentry/node';
+import * as Tracing from '@sentry/tracing';
+
+Sentry.init({
+  dsn: "https://f8270ae1fa574caf8943f526311b3a69@o1059731.ingest.sentry.io/6048582",
+
+  // Set tracesSampleRate to 1.0 to capture 100%
+  // of transactions for performance monitoring.
+  // We recommend adjusting this value in production
+  tracesSampleRate: 1.0,
+});
+
+const transaction = Sentry.startTransaction({
+  op: "test",
+  name: "My First Test Transaction",
+});
 
 export * from './application';
 
@@ -10,7 +26,7 @@ export async function main(options: ApplicationConfig = {}) {
   const url = app.restServer.url;
   console.log(`Server is running at ${url}`);
   console.log(`Try ${url}/ping`);
-
+  transaction.finish()
   return app;
 }
 
@@ -33,6 +49,7 @@ if (require.main === module) {
     },
   };
   main(config).catch(err => {
+    Sentry.captureException(err)
     console.error('Cannot start the application.', err);
     process.exit(1);
   });
