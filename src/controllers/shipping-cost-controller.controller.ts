@@ -65,10 +65,15 @@ export class ShippingCostController {
     } catch (error) {
       Sentry.captureException(error)
     }
-    shippingCost = (shippingCost) - (shippingCost * (data.discount / 100))
+    if (zoneFound) {
+      shippingCost = (shippingCost) - (shippingCost * (data.discount / 100))
+      return {
+        shippingCost: shippingCost.toFixed(2),
+        shippingTime: zoneFound?.shippingTime
+      }
+    }
     return {
-      shippingCost: shippingCost.toFixed(2),
-      shippingTime: zoneFound?.shippingTime
+      error: 'No se encontró la zona'
     }
   }
   @get('/getZone/{postalCode}')
