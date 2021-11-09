@@ -75,21 +75,26 @@ export class ShippingCostController {
     },
   })
   async getZone(
-    @param.path.string('postalCode') postalCode: string
+    @param.path.number('postalCode') postalCode: number
   ): Promise<Zone | {}> {
     const stateFound = await this.postalCodeRepository.findOne({
-      where: {code: postalCode},
-    });
+      where: {
+        code: postalCode
+      }
+    }
+    )
     const zoneFound = await this.zoneRepository.findOne({
       where: {states: stateFound?.state},
     });
-    if (zoneFound) {
+    if (zoneFound && postalCode) {
       return {
         name: zoneFound.name,
         id: zoneFound.id,
         shippingTime: zoneFound.shippingTime
       }
     }
-    return {}
+    return {
+      error: 'No se encontró la zona'
+    }
   }
 }
