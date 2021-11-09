@@ -44,17 +44,23 @@ export class ShippingCostController {
     let shippingCost = 0;
     try {
       zoneFound = await this.zoneRepository.findById(data.idZone);
-      const kilos = Math.trunc(data.weight);
-      if (kilos <= 8) {
-        shippingCost = (zoneFound?.priceKilos as Record<string, number>)[
-          Math.trunc(kilos).toString()
-        ];
+      if (zoneFound) {
+        const kilos = Math.trunc(data.weight);
+        if (kilos <= 8) {
+          shippingCost = (zoneFound?.priceKilos as Record<string, number>)[
+            Math.trunc(kilos).toString()
+          ];
+        } else {
+          const extraKilos = kilos - 8;
+          shippingCost =
+            (zoneFound?.priceKilos as Record<string, number>)['8'] +
+            (extraKilos *
+              (zoneFound?.priceKilos as Record<string, number>)['extra']);
+        }
       } else {
-        const extraKilos = kilos - 8;
-        shippingCost =
-          (zoneFound?.priceKilos as Record<string, number>)['8'] +
-          (extraKilos *
-            (zoneFound?.priceKilos as Record<string, number>)['extra']);
+        return {
+          error: 'No se encontró la zona'
+        }
       }
     } catch (error) {
       Sentry.captureException(error)
