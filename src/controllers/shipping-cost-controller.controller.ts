@@ -1,10 +1,10 @@
 // Uncomment these imports to begin using these cool features!
 
 // import {inject} from '@loopback/core';
-import {repository, Where} from '@loopback/repository';
+import {repository} from '@loopback/repository';
 import {post, get, getModelSchemaRef, response, requestBody, param} from '@loopback/rest';
 import * as Sentry from '@sentry/node';
-import {PaymentData, PostalCode, Zone} from '../models';
+import {PaymentData, Zone} from '../models';
 import {
   CouponRepository,
   PostalCodeRepository,
@@ -59,13 +59,13 @@ export class ShippingCostController {
     } catch (error) {
       Sentry.captureException(error)
     }
-    shippingCost = (shippingCost * data.discount) / 100
+    shippingCost = (shippingCost) - (shippingCost * (data.discount / 100))
     return {
-      shippingCost,
+      shippingCost: shippingCost.toFixed(2),
       shippingTime: zoneFound?.shippingTime
     }
   }
-  @get('/getZone')
+  @get('/getZone/{postalCode}')
   @response(200, {
     description: 'get zone by postal code',
     content: {
@@ -75,26 +75,21 @@ export class ShippingCostController {
     },
   })
   async getZone(
-    @param.where(PostalCode) where?: Where<Zone>,
+    @param.path.string('postalCode') postalCode: string
   ): Promise<Zone | {}> {
-    let res = {}
-    try {
-      const stateFound = await this.postalCodeRepository.find({
-        where: where,
-      });
-      const zoneFound = await this.zoneRepository.find({
-        where: {states: stateFound[0]?.state},
-      });
-      if (zoneFound[0]) {
-        res = {
-          name: zoneFound[0].name,
-          id: zoneFound[0].id,
-          state: stateFound[0].state
-        }
+    const stateFound = await this.postalCodeRepository.findOne({
+      where: {code: postalCode},
+    });
+    const zoneFound = await this.zoneRepository.findOne({
+      where: {states: stateFound?.state},
+    });
+    if (zoneFound) {
+      return {
+        name: zoneFound.name,
+        id: zoneFound.id,
+        shippingTime: zoneFound.shippingTime
       }
-    } catch (error) {
-      Sentry.captureException(error)
     }
-    return res
+    return {}
   }
 }
